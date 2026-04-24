@@ -84,7 +84,7 @@ class ClusterVisualizer:
         embeddings_2d_tsne = tsne.fit_transform(embeddings)
 
         if UMAP_AVAILABLE:
-            reducer = umap.UMAP(n_components=2, random_state=None)
+            reducer = umap.UMAP(n_components=2, n_jobs = -1)
             embeddings_2d_umap = reducer.fit_transform(embeddings)
         else:
             # Fallback to PCA if UMAP not available

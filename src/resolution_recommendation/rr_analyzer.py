@@ -323,30 +323,29 @@ class ResolutionRecommendationAnalyzer:
                 logger.info(f"Saved {method_name} plot to {plot_path}")
 
         distribution_df = vis_result.get('cluster_distribution')
-        x_labels = ["Noise" if c == -1 else f"Cluster {c}" for c in distribution_df["cluster"]]
-        # bar_colors = [label_to_color[c] for c in distribution_df["cluster"]]
-        bars = plt.bar(x_labels, distribution_df["count"], alpha=0.85)
-        for bar, count, pct in zip(bars, distribution_df["count"], distribution_df["percentage"]):
-            text = f"{count}"
-            text += f"\n({pct:.1f}%)"
+        if distribution_df is not None:
+            plt.figure(figsize=(10, 7))
+            x_labels = ["Noise" if c == -1 else f"Cluster {c}" for c in distribution_df["cluster"]]
+            bars = plt.bar(x_labels, distribution_df["count"], alpha=0.85)
+            for bar, count, pct in zip(bars, distribution_df["count"], distribution_df["percentage"]):
+                text = f"{count}\n({pct:.1f}%)"
+                plt.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_height(),
+                    text,
+                    ha="center",
+                    va="bottom"
+                )
+            plt.title(f"{clustering_result.get('method', 'unknown')} Cluster Distribution")
+            plt.xlabel("Cluster")
+            plt.ylabel("Count")
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plot_path = output_dir / f"recommendation_clustering_{clustering_result.get('method', 'unknown')}_clustering_distribution.png"
+            plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            logger.info(f"Saved clustering distribution plot to {plot_path}")
 
-            plt.text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height(),
-                text,
-                ha="center",
-                va="bottom"
-            )
-        plt.figure(figsize=(10, 7))
-        plt.title(f"{clustering_result.get('method', 'unknown')} Cluster Distribution")
-        plt.xlabel("Cluster")
-        plt.ylabel("Count")
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plot_path = output_dir / f"recommendation_clustering_{clustering_result.get('method', 'unknown')}_{'clustering_distribution'}.png"
-        plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        logger.info(f"Saved clustering distribution plot to {plot_path}")
 
         # 7. Topic Extraction using Specialized RR Analyzer
         logger.info("Extracting topics via LLM...")
