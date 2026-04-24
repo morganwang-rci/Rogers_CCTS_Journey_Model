@@ -316,7 +316,8 @@ class ResolutionRecommendationAnalyzer:
                 plt.ylabel(f"{method_name} 2")
                 plt.legend()
                 plt.tight_layout()
-                plot_path = os.path.join(output_dir, f"recommendation_clustering_{method_name.lower()}_{clustering_result.get('method', 'unknown')}.png")
+                # plot_path = os.path.join(output_dir, f"recommendation_clustering_{method_name.lower()}_{clustering_result.get('method', 'unknown')}.png")
+                plot_path = output_dir / f"recommendation_clustering_{method_name.lower()}_{clustering_result.get('method', 'unknown')}.png"
                 plt.savefig(plot_path, dpi=300, bbox_inches='tight')
                 plt.close()
                 logger.info(f"Saved {method_name} plot to {plot_path}")
