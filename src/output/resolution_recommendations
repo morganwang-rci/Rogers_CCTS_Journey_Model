@@ -1,0 +1,147 @@
+{
+  "clustering_method": null,
+  "n_clusters": 3,
+  "topics": {
+    "cluster_payloads": [
+      {
+        "label": 0,
+        "cluster_size": 1596,
+        "representative_points": [
+          "Enhance training for agents on handling discrepancies and providing alternative solutions.",
+          "Enhance training for agents on clear communication, especially in explaining complex issues like fraud investigations.",
+          "Train agents to provide consistent and clear information regarding order status and next steps.",
+          "Enhance training for agents to provide clear and consistent communication regarding the return process.",
+          "Implement training for agents on handling sensitive cases involving deceased account holders and policy exceptions.",
+          "Improve agent training on account access procedures to reduce inefficiencies and improve resolution rates.",
+          "Enhance training for agents on account verification processes to prevent unauthorized changes. [Interaction Date/ID: 2025-11-22 - 'Unauthorized package change due to agent error.']",
+          "Enhance training for agents to verify account details before proceeding with customer interactions.",
+          "Enhance training for agents to improve account verification processes and reduce repeated transfers.",
+          "Enhance training for agents on AppleCare policies and return processes to ensure they can provide clear and accurate information to customers.",
+          "Enhance training for agents on handling equipment return processes to prevent similar issues.",
+          "Enhance training for agents on policy communication to ensure customers fully understand return policies before making decisions.",
+          "Provide training for agents to verify account details thoroughly to avoid confusion.",
+          "Enhance training on the Save and Return policy to ensure clear communication and understanding by both agents and customers.",
+          "Enhance training for store staff to ensure awareness of return policies and procedures."
+        ],
+        "distances_to_centroid": [
+          9.52998153391782e-05,
+          0.00014130836521841772,
+          0.00014165547295297287,
+          0.000172212884364642,
+          0.00018145320833762302,
+          0.00019113354725208698,
+          0.00019919978960758478,
+          0.00020149851588047163,
+          0.00020496527059554737,
+          0.00021600417455014398,
+          0.00022170357247253136,
+          0.00022358513300013705,
+          0.00022390831596341698,
+          0.00023004187930242281,
+          0.00023113739564017965
+        ]
+      },
+      {
+        "label": 1,
+        "cluster_size": 1558,
+        "representative_points": [
+          "Establish a dedicated escalation path for porting issues to ensure timely resolution and prevent repeated customer contacts.",
+          "Establish a clear escalation path for unresolved porting issues to ensure timely resolution.",
+          "Establish a clear escalation path for unresolved issues to ensure customer satisfaction.",
+          "Establish a clear escalation path for unresolved issues to ensure customer satisfaction and prevent regulatory complaints.",
+          "Develop a clear escalation pathway for unresolved technical issues to prevent customer frustration and regulatory complaints.",
+          "Establish a clear escalation path for unresolved technical issues to prevent customer frustration and external complaints.",
+          "Establish a clear escalation path for unresolved porting issues to prevent redirection without resolution.",
+          "Implement a clear escalation process for unresolved porting issues to ensure timely resolution and prevent external complaints.",
+          "Establish a dedicated escalation path for business-critical issues to ensure timely resolution and prevent business disruptions.",
+          "Establish a clear escalation path for unresolved technical issues to prevent external complaints.",
+          "Develop a clear escalation path for unresolved issues to ensure timely resolution and prevent regulatory complaints.",
+          "Establish a clear escalation path for unresolved issues to prevent them from reaching regulatory complaints.",
+          "Develop a clear escalation path for unresolved complaints to ensure timely resolution.",
+          "Develop a protocol for immediate resolution or temporary assurance in potential fraud cases to prevent escalation.",
+          "Establish a clear internal escalation path for unresolved customer issues to prevent external complaints."
+        ],
+        "distances_to_centroid": [
+          0.00023987186580842756,
+          0.00043957036811925754,
+          0.0004879963505818319,
+          0.0005423055924576037,
+          0.0005539922158674937,
+          0.0005629326194021012,
+          0.0005723074822682195,
+          0.0005920347464462017,
+          0.0006191127843474531,
+          0.0006535781055377887,
+          0.0006936762975340294,
+          0.0006939327496137127,
+          0.0007034839231446766,
+          0.000714598898602703,
+          0.0007183119925060488
+        ]
+      },
+      {
+        "label": 2,
+        "cluster_size": 4475,
+        "representative_points": [
+          "Improve communication processes to ensure clear and timely notifications regarding service suspensions.",
+          "Develop a comprehensive policy for handling service agreement changes during moves to avoid ECF disputes.",
+          "Improve communication regarding refund timelines and ensure customers are informed of any delays or issues proactively.",
+          "Implement clear protocols for order cancellation and billing adjustments to prevent similar issues.",
+          "Implement a standardized process for communicating S&R balances to ensure consistency across interactions.",
+          "Improve communication regarding cancellation policies and options for customers who are unable to return to Canada.",
+          "Implement clear communication protocols to ensure customers are informed about refund methods and timelines accurately.",
+          "Provide clear and consistent communication regarding refund processing times to manage customer expectations effectively.",
+          "Improve internal communication to ensure all relevant parties are informed of account changes and cancellations.",
+          "Implement a system to ensure billing instructions are accurately followed and communicated to customers.",
+          "Implement a clear communication protocol to reassure customers about refund processes and timelines.",
+          "Review and adjust notification systems to ensure timely delivery and acknowledgment by customers.",
+          "Establish a direct communication channel between Fido and collection agencies to verify payments and update account statuses efficiently.",
+          "Implement a clear and consistent communication protocol for handling credit reporting disputes to ensure customers receive timely and accurate information.",
+          "Implement a clear communication protocol for confirming cancellations and billing adjustments to prevent confusion."
+        ],
+        "distances_to_centroid": [
+          0.0001139917076588004,
+          0.00037383068265017805,
+          0.00044107996147735307,
+          0.00046001552239760546,
+          0.00046315850129996505,
+          0.0004899933513914378,
+          0.0004934636669042813,
+          0.0005009102554388578,
+          0.0005055092047102638,
+          0.0005097105579018324,
+          0.0005121549878353004,
+          0.0005439991784950138,
+          0.0005543234181114576,
+          0.0005633991932600946,
+          0.0005668884454098633
+        ]
+      }
+    ],
+    "raw_response": "```json\n[\n    {\n        \"label\": 0,\n        \"topic\": \"Agent Training on Account Verification and Policy Communication\",\n        \"description\": \"Enhance agent training programs to focus on account verification processes and clear communication of policies, especially regarding returns and sensitive cases. This will ensure agents provide accurate information and reduce unauthorized changes or repeated transfers.\",\n        \"reason\": \"The cluster highlights a recurring need for improved agent training in verifying account details and communicating policies clearly. Addressing this will prevent unauthorized actions and improve customer understanding of procedures.\",\n        \"short_example\": \"Unauthorized package change due to agent error.\"\n    },\n    {\n        \"label\": 1,\n        \"topic\": \"Establishment of Clear Escalation Paths for Unresolved Issues\",\n        \"description\": \"Develop and implement clear escalation pathways for unresolved issues, particularly in porting and technical areas, to ensure timely resolutions and prevent regulatory complaints. This will streamline issue handling and improve customer satisfaction.\",\n        \"reason\": \"The cluster consistently points to the lack of clear escalation processes as a root cause of unresolved issues leading to customer frustration and potential regulatory complaints.\",\n        \"short_example\": \"Repeated customer contacts due to unresolved porting issues.\"\n    },\n    {\n        \"label\": 2,\n        \"topic\": \"Standardized Communication Protocols for Service Changes and Refunds\",\n        \"description\": \"Implement standardized communication protocols to ensure customers receive timely and accurate information about service changes, cancellations, and refund processes. This will help manage expectations and reduce disputes.\",\n        \"reason\": \"The cluster emphasizes the need for clear and consistent communication regarding service suspensions, refunds, and cancellations to prevent customer confusion and disputes.\",\n        \"short_example\": \"Customer confusion over refund timelines and methods.\"\n    }\n]\n```",
+    "topics": [
+      {
+        "label": 0,
+        "topic": "Agent Training on Account Verification and Policy Communication",
+        "description": "Enhance agent training programs to focus on account verification processes and clear communication of policies, especially regarding returns and sensitive cases. This will ensure agents provide accurate information and reduce unauthorized changes or repeated transfers.",
+        "reason": "The cluster highlights a recurring need for improved agent training in verifying account details and communicating policies clearly. Addressing this will prevent unauthorized actions and improve customer understanding of procedures.",
+        "short_example": "Unauthorized package change due to agent error."
+      },
+      {
+        "label": 1,
+        "topic": "Establishment of Clear Escalation Paths for Unresolved Issues",
+        "description": "Develop and implement clear escalation pathways for unresolved issues, particularly in porting and technical areas, to ensure timely resolutions and prevent regulatory complaints. This will streamline issue handling and improve customer satisfaction.",
+        "reason": "The cluster consistently points to the lack of clear escalation processes as a root cause of unresolved issues leading to customer frustration and potential regulatory complaints.",
+        "short_example": "Repeated customer contacts due to unresolved porting issues."
+      },
+      {
+        "label": 2,
+        "topic": "Standardized Communication Protocols for Service Changes and Refunds",
+        "description": "Implement standardized communication protocols to ensure customers receive timely and accurate information about service changes, cancellations, and refund processes. This will help manage expectations and reduce disputes.",
+        "reason": "The cluster emphasizes the need for clear and consistent communication regarding service suspensions, refunds, and cancellations to prevent customer confusion and disputes.",
+        "short_example": "Customer confusion over refund timelines and methods."
+      }
+    ]
+  },
+  "total_recommendations": 0
+}
