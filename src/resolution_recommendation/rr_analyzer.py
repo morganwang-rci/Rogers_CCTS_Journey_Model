@@ -335,12 +335,16 @@ class ResolutionRecommendationAnalyzer:
         logger.info("Extracting topics...")
         topic_result = self.extract_topics(embeddings, clustering_result['labels'], texts)
         return {
-            'data': df,
-            'texts': texts,
+            # 'data': df,
+            # 'texts': texts,
+            'n_clusters': clustering_result.get('n_clusters', 'unknown'),
             'embeddings': embeddings,
             'reduction_info': reduction_info,
             'clustering': clustering_result,
+            'clustering_method': clustering_result.get('method', 'unknown'),
             'topics': topic_result,
+            'recommendations':topic_result.get('topics',[]),
+            'cluster_payloads':topic_result.get('cluster_payloads',[])
         }
 
 

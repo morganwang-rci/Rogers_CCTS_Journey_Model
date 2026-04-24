@@ -44,6 +44,7 @@ class ClusteringAnalyzer:
         return {
             'method': 'kmeans',
             'model': model,
+            'n_clusters': n_clusters,
             'labels': labels,
             'embeddings_shape': embeddings.shape,
             **kmeans_metrics
@@ -113,7 +114,7 @@ class ClusteringAnalyzer:
 
         return {
             'method': 'leiden',
-            'labels':labels,
+            'labels': labels,
             **results
         }
 
@@ -169,7 +170,7 @@ class ClusteringAnalyzer:
             decision_rule = "FALLBACK_NO_METHOD_ELIGIBLE"
 
         return {
-            "best_method": best["method"],
+            "method": best["method"],
             "decision_rule": decision_rule,
             "explainability_score": round(best["composite_score"], 2),
             "n_clusters": best["n_clusters"],

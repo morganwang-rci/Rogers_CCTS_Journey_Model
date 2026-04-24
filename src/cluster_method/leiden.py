@@ -116,8 +116,8 @@ class LeidenClustering:
         # -----------------------------
         # 2. Normalize embeddings
         # -----------------------------
-        if leiden_metric == "cosine":
-            X = normalize(X, norm="l2")
+        # if leiden_metric == "cosine":
+        #     X = normalize(X, norm="l2")
 
         # -----------------------------
         # 3. Build kNN graph
@@ -320,6 +320,7 @@ class LeidenClustering:
         # 8. Return
         # -----------------------------
         result: Dict[str, Any] = {
+            "method": "KNN+Leiden",
             "n_clusters": n_clusters,
             "modularity": modularity,
             "partition": partition,

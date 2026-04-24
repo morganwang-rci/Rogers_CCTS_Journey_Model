@@ -84,10 +84,13 @@ def save_rr_results(results: Dict[str, Any], output_path: str) -> None:
 
     # Create a summary with key information
     summary = {
-        "clustering_method": results.get("clustering_method"),
-        "n_clusters": len(results.get("topics", [])),
-        "topics": results.get("topics"),
-        "total_recommendations": len(results.get("dataframe", [])),
+        # "clustering_method": results.get(""),
+        "clustering_method": results.get("clustering_method", results.get("clustering", {}).get("method", "unknown")),
+        "n_clusters": results.get("n_clusters", []),
+        "raw_response": results.get("topics"),
+        "recommendations": results.get("recommendations", []),
+        "cluster_payloads": results.get("cluster_payloads", []),
+        "raw_results": results
     }
 
     with output_file.open("w", encoding="utf-8") as f:

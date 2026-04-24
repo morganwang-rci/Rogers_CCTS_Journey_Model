@@ -114,7 +114,7 @@ class KMeansClustering:
         else:
             print(f"  Using user-specified k={n_clusters}")
 
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         kmeans_labels = kmeans.fit_predict(embeddings)
         print(f"  ✓ KMeans complete: {len(np.unique(kmeans_labels))} clusters created")
         kmeans_metrics = {}
@@ -145,5 +145,12 @@ class KMeansClustering:
             kmeans_metrics['calinski_harabasz_normalized'] * 30
         ) / 100
         kmeans_metrics['composite_score'] = kmeans_composite
+        # result: Dict[str, Any] = {
+        #     "method": "Kmeans",
+        #     "model": kmeans,
+        #     "n_clusters": n_clusters,
+        #     "label": kmeans_labels,
+        #     "metrics": kmeans_metrics,
+        # }
 
         return kmeans, kmeans_labels, n_clusters, kmeans_metrics

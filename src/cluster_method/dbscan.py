@@ -142,5 +142,5 @@ class DBSCANClustering:
             # noise_score * (10 if noise_percentage < 30 else 5)
         ) / 100
         dbscan_metrics['composite_score'] = min(dbscan_composite, 100)
-
+        
         return clustering_model, labels, dbscan_metrics
