@@ -1,9 +1,10 @@
+import os
 import logging
 import numpy as np
 import pandas as pd
 from typing import List, Dict, Any, Optional
 from openai import AzureOpenAI
-
+from pathlib import Path
 # Import standardized modules from the project structure
 from data_processing.data_processing import DataProcessor
 from data_processing.embeddings import EmbeddingProcessor
@@ -266,20 +267,33 @@ class ResolutionRecommendationAnalyzer:
         # logger.info(f"Clustering complete. Method: {clustering_result['method']}, Clusters: {clustering_result['n_clusters']}")
         # 6 Visualizing
         logger.info("Visualizing clustering results...")
-        import os
-        output_dir = os.path.join("./output", "resolution_recommendation_clustering_plots")
+        # output_dir = os.path.join("./output", "resolution_recommendation_clustering_plots")
         
-        # Ensure output directory exists (handles both file and directory conflicts)
-        try:
-            os.makedirs(output_dir, exist_ok=True)
-        except NotADirectoryError:
-            # If a file with the same name exists, remove it first
-            if os.path.exists(output_dir) and not os.path.isdir(output_dir):
-                logger.warning(f"Removing conflicting file: {output_dir}")
-                os.remove(output_dir)
-                os.makedirs(output_dir, exist_ok=True)
-            else:
-                raise
+        # # Ensure output directory exists (handles both file and directory conflicts)
+        # try:
+        #     os.makedirs(output_dir, exist_ok=True)
+        # except NotADirectoryError:
+        #     # If a file with the same name exists, remove it first
+        #     if os.path.exists(output_dir) and not os.path.isdir(output_dir):
+        #         logger.warning(f"Removing conflicting file: {output_dir}")
+        #         os.remove(output_dir)
+        #         os.makedirs(output_dir, exist_ok=True)
+        #     else:
+        #         raise
+        
+        from pathlib import Path
+
+        base_dir = Path("./output")
+        output_dir = base_dir / "resolution_recommendation_clustering_plots"
+
+        # Remove file conflicts
+        for path_candidate in [base_dir, output_dir]:
+            if path_candidate.exists() and path_candidate.is_file():
+                logger.warning(f"Removing conflicting file: {path_candidate}")
+                path_candidate.unlink()
+
+        # Create directory
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         
         
