@@ -328,8 +328,7 @@ class ResolutionRecommendationAnalyzer:
         bars = plt.bar(x_labels, distribution_df["count"], alpha=0.85)
         for bar, count, pct in zip(bars, distribution_df["count"], distribution_df["percentage"]):
             text = f"{count}"
-            if show_percentage:
-                text += f"\n({pct:.1f}%)"
+            text += f"\n({pct:.1f}%)"
 
             plt.text(
                 bar.get_x() + bar.get_width() / 2,
