@@ -170,7 +170,7 @@ class ClusteringAnalyzer:
             decision_rule = "FALLBACK_NO_METHOD_ELIGIBLE"
 
         return {
-            "method": best["method"],
+            "best_method": best["method"],
             "decision_rule": decision_rule,
             "explainability_score": round(best["composite_score"], 2),
             "n_clusters": best["n_clusters"],
