@@ -153,7 +153,7 @@ class EmbeddingProcessor:
                 n_neighbors=n_neighbors,
                 min_dist=min_dist,
                 random_state=42,
-                metric="euclidean",
+                metric="cosine",
             )
 
             reduced_embeddings = umap_reducer.fit_transform(embeddings_array)

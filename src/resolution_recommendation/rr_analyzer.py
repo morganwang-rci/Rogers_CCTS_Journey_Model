@@ -247,7 +247,7 @@ class ResolutionRecommendationAnalyzer:
                 #         method=dim_reduction_method
                 #     )
                 # )
-                embeddings, reduction_info = self.reduce_dimensions(embeddings)
+                embeddings, reduction_info = self.reduce_dimensions(embeddings, method= dim_reduction_method)
         else:
             logger.info("Skipping dimension reduction")
             reduction_info = None
