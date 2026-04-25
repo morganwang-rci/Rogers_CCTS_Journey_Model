@@ -89,12 +89,10 @@ class ThemeAnalyzer:
         """
         if method == "auto":
             # Try different methods and select best
-            kmeans_result = self.cluster_analyzer.apply_kmeans_clustering(embeddings, auto_k = True)
-            dbscan_result = self.cluster_analyzer.apply_dbscan_clustering(embeddings,  min_cluster_size= 30, min_samples = 10, metric = 'euclidean')
-            leiden_result = self.cluster_analyzer.apply_leiden_clustering(embeddings, k= 30, resolution_parameter = 0.7,  metric = "cosine")
-            selection = self.cluster_analyzer.select_best_clustering_method(
-             kmeans_result, dbscan_result, leiden_result
-            )
+            kmeans_result = self.cluster_analyzer.apply_kmeans_clustering(embeddings, **{k: v for k, v in clustering_params.items() if k in ['n_clusters', 'auto_k']})
+            dbscan_result = self.cluster_analyzer.apply_dbscan_clustering(embeddings,  **{k: v for k, v in clustering_params.items() if k in ['min_cluster_size', 'min_samples', 'dbscan_metric']})
+            leiden_result = self.cluster_analyzer.apply_leiden_clustering(embeddings,  **{k: v for k, v in clustering_params.items() if k in ['k', 'use_snn', 'resolution_parameter', 'leiden_metric', 'return_graph']})
+            selection = self.cluster_analyzer.select_best_clustering_method(kmeans_result, dbscan_result, leiden_result)
 
             if selection['best_method'] == 'kmeans':
                 return kmeans_result
@@ -186,12 +184,12 @@ class ThemeAnalyzer:
             logger.error(f"Failed to parse topic response as JSON: {response}")
             return []
 
-    def run_complete_analysis(
+    def run_theme_analysis(
         self,
         data_folder: str,
         text_column: str = "primary_complaint_issue_clean",
         clustering_method: str = "auto",
-        reduce_dimensions: bool = True,
+        dim_reduction_method: str = "umap",
         norm: bool = True,
         **clustering_params
     ) -> Dict[str, Any]:
@@ -223,9 +221,11 @@ class ThemeAnalyzer:
         if norm:
             logger.info("Embedding Normalization...")
             embeddings = self.normalize_embeddings(embeddings)
-        if reduce_dimensions:
+        else:
+            logger.info("Skipping embedding normalization")
+        if dim_reduction_method in ("umap", "pca", "auto"):
             logger.info("Reducing dimensions...")
-            embeddings, reduction_info = self.reduce_dimensions(embeddings)
+            embeddings, reduction_info = self.reduce_dimensions(embeddings, method = dim_reduction_method)
         else:
             reduction_info = None
         
@@ -241,14 +241,21 @@ class ThemeAnalyzer:
 
         logger.info("Visualizing clustering results...")
         import os
-        output_dir = os.path.join("./output", "theme_analysis", "theme_clustering_plots")
-        
-        # Ensure parent directories exist first
-        # os.makedirs(os.path.join("./output", "theme_clustering_plots"), exist_ok=True)
-        # os.makedirs(output_dir, exist_ok=True)
-        output_dir = os.path.join("./output", "ccts_theme_clustering_plots")
-        os.makedirs(output_dir, exist_ok=True)
-        
+        from pathlib import Path
+        base_dir = Path("./output")
+        output_dir = base_dir / "theme_clustering_plots"
+
+        # Remove file conflicts
+        for path_candidate in [base_dir, output_dir]:
+            if path_candidate.exists() and path_candidate.is_file():
+                logger.warning(f"Removing conflicting file: {path_candidate}")
+                path_candidate.unlink()
+            elif path_candidate.exists() and path_candidate.is_dir():
+                # Directory exists, no action needed
+                pass
+        # Create directory
+        output_dir.mkdir(parents=True, exist_ok=True)
+
         # Save plots
         import matplotlib.pyplot as plt
         vis_result = self.visualize_clusters(embeddings, clustering_result['labels'])
@@ -274,6 +281,30 @@ class ThemeAnalyzer:
                 plt.savefig(plot_path, dpi=300, bbox_inches='tight')
                 plt.close()
                 logger.info(f"Saved {method_name} plot to {plot_path}")
+        
+        distribution_df = vis_result.get('cluster_distribution')
+        if distribution_df is not None:
+            plt.figure(figsize=(10, 7))
+            x_labels = ["Noise" if c == -1 else f"Cluster {c}" for c in distribution_df["cluster"]]
+            bars = plt.bar(x_labels, distribution_df["count"], alpha=0.85)
+            for bar, count, pct in zip(bars, distribution_df["count"], distribution_df["percentage"]):
+                text = f"{count}\n({pct:.1f}%)"
+                plt.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_height(),
+                    text,
+                    ha="center",
+                    va="bottom"
+                )
+            plt.title(f"{clustering_result.get('method', 'unknown')} Cluster Distribution")
+            plt.xlabel("Cluster")
+            plt.ylabel("Count")
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plot_path = output_dir / f"theme_clustering_{clustering_result.get('method', 'unknown')}_clustering_distribution.png"
+            plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            logger.info(f"Saved clustering distribution plot to {plot_path}")
 
 
         # 5. Extract topics
@@ -287,9 +318,12 @@ class ThemeAnalyzer:
         return {
             'data': df,
             'texts': texts,
+            'n_clusters': clustering_result.get('n_clusters', 'unknown'),
             'embeddings': embeddings,
             'reduction_info': reduction_info,
             'clustering': clustering_result,
+            'clustering_method': clustering_result.get('method', 'unknown'),
             'topics': topic_result,
-            'evaluation': evaluation
+            'recommendations':topic_result.get('topics',[]),
+            'cluster_payloads':topic_result.get('cluster_payloads',[])
         }
