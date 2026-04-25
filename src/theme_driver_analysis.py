@@ -35,7 +35,7 @@ def load_theme_config() -> Dict[str, Any]:
     top_n_representatives = int(os.getenv("TOP_N_REPRESENTATIVES", "15"))
     
     # Output configuration
-    output_path = os.getenv("RR_OUTPUT_PATH", "./output/theme_analysis/")
+    output_path = os.getenv("THEME_OUTPUT_PATH", "./output/theme_analysis/")
 
     
     # Clustering parameters
@@ -88,7 +88,7 @@ def save_theme_results(results: Dict[str, Any], output_path: str) -> None:
         # "clustering_method": results.get(""),
         "clustering_method": results.get("clustering_method", results.get("clustering", {}).get("method", "unknown")),
         "n_clusters": results.get("n_clusters", []),
-        "raw_response": results.get("topics"),
+        "raw_response": results.get("topics", []),
         "recommendations": results.get("recommendations", []),
         "cluster_payloads": results.get("cluster_payloads", []),
         "raw_results": results
