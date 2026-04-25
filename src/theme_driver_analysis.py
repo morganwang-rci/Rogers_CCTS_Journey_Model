@@ -95,7 +95,7 @@ def save_theme_results(results: Dict[str, Any], output_path: str) -> None:
     }
 
     with output_file.open("w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2, ensure_ascii=False)
+        json.dump(summary, f, indent=2, ensure_ascii=False, default=str)
 
     logger.info("Theme analysis summary saved to %s", output_file)
 
