@@ -187,7 +187,7 @@ class ThemeAnalyzer:
     def run_theme_analysis(
         self,
         data_folder: str,
-        text_column: str = "primary_complaint_issue_clean",
+        text_column: str = "primary_complaint_issue",
         clustering_method: str = "auto",
         dim_reduction_method: str = "umap",
         norm: bool = True,
