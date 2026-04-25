@@ -23,7 +23,7 @@ def load_theme_config() -> Dict[str, Any]:
     if not data_folder:
         raise ValueError("THEME_DATA_FOLDER environment variable is required")
 
-    text_column = os.getenv("THEME_TEXT_COLUMN", "primary_complaint_issue"))
+    text_column = os.getenv("THEME_TEXT_COLUMN", "primary_complaint_issue")
     clustering_method = os.getenv("THEME_CLUSTERING_METHOD", "leiden")
     dim_reduction_method = os.getenv("THEME_DIM_REDUCTION_METHOD", "umap")
     # reduce_dimensions = os.getenv("THEME_REDUCE_DIMENSIONS", "False").strip().lower() in (
@@ -41,7 +41,7 @@ def load_theme_config() -> Dict[str, Any]:
     # Clustering parameters
     clustering_params = {}
     if clustering_method in ("kmeans", "auto"):
-        n_clusters_env = os.getenv("RR_KMEANS_N_CLUSTERS", "None")
+        n_clusters_env = os.getenv("THEME_KMEANS_N_CLUSTERS", "None")
         if n_clusters_env and n_clusters_env.strip().lower() not in ("none", "", "null"):
             clustering_params["n_clusters"] = int(n_clusters_env)
         else:
@@ -50,20 +50,21 @@ def load_theme_config() -> Dict[str, Any]:
 
 
     elif clustering_method in ("dbscan", "auto"):
-        clustering_params["min_cluster_size"] = int(os.getenv("RR_DBSCAN_MIN_CLUSTER_SIZE", "30"))
-        clustering_params["min_samples"] = int(os.getenv("RR_DBSCAN_MIN_SAMPLES", "10"))
-        clustering_params["dbscan_metric"] = os.getenv("RR_DBSCAN_METRIC", "euclidean")
+        clustering_params["min_cluster_size"] = int(os.getenv("THEME_DBSCAN_MIN_CLUSTER_SIZE", "30"))
+        clustering_params["min_samples"] = int(os.getenv("THEME_DBSCAN_MIN_SAMPLES", "10"))
+        clustering_params["dbscan_metric"] = os.getenv("THEME_DBSCAN_METRIC", "euclidean")
         
     elif clustering_method in ("leiden", "auto"):
-        clustering_params["k"] = int(os.getenv("RR_LEIDEN_K", "30"))
-        clustering_params["resolution_parameter"] = float(os.getenv("RR_LEIDEN_RESOLUTION", "0.7"))
-        clustering_params["use_snn"] = os.getenv("RR_LEIDEN_USE_SNN", "True").strip().lower() in ("1", "true", "yes")
-        clustering_params["leiden_metric"] = os.getenv("RR_LEIDEN_METRIC", "cosine")
-        clustering_params["random_state"] = int(os.getenv("RR_LEIDEN_RANDOM_STATE", "42"))
-        clustering_params["return_graph"] =  os.getenv("RR_LEIDEN_RETURN_GRAPH", "False").strip().lower() in ("1", "true", "yes")
+        clustering_params["k"] = int(os.getenv("THEME_LEIDEN_K", "30"))
+        clustering_params["resolution_parameter"] = float(os.getenv("THEME_LEIDEN_RESOLUTION", "0.7"))
+        clustering_params["use_snn"] = os.getenv("THEME_LEIDEN_USE_SNN", "True").strip().lower() in ("1", "true", "yes")
+        clustering_params["leiden_metric"] = os.getenv("THEME_LEIDEN_METRIC", "cosine")
+        clustering_params["random_state"] = int(os.getenv("THEME_LEIDEN_RANDOM_STATE", "42"))
+        clustering_params["return_graph"] =  os.getenv("THEME_LEIDEN_RETURN_GRAPH", "False").strip().lower() in ("1", "true", "yes")
     # For "auto" method, no specific parameters needed
 
     return {
+        "text_column": text_column,
         "data_folder": data_folder,
         "clustering_method": clustering_method,
         "dim_reduction_method": dim_reduction_method,
