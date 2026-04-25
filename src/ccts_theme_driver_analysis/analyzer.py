@@ -313,11 +313,11 @@ class ThemeAnalyzer:
 
         # 6. Evaluate results
         logger.info("visualization results...")
-        evaluation = self.evaluate_clusters(embeddings, clustering_result['labels'])
+        # evaluation = self.evaluate_clusters(embeddings, clustering_result['labels'])
         # self.visualize_clusters(embeddings, clustering_result['labels'])
         return {
-            'data': df,
-            'texts': texts,
+            # 'data': df,
+            # 'texts': texts,
             'n_clusters': clustering_result.get('n_clusters', 'unknown'),
             'embeddings': embeddings,
             'reduction_info': reduction_info,

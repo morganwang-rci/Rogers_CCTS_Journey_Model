@@ -23,7 +23,7 @@ def load_theme_config() -> Dict[str, Any]:
     if not data_folder:
         raise ValueError("THEME_DATA_FOLDER environment variable is required")
 
-    text_column = os.getenv("THEME_TEXT_COLUMN", "primary_complaint_issue")
+    text_column = os.getenv("THEME_TEXT_COLUMN", "primary_complaint_issue"))
     clustering_method = os.getenv("THEME_CLUSTERING_METHOD", "leiden")
     dim_reduction_method = os.getenv("THEME_DIM_REDUCTION_METHOD", "umap")
     # reduce_dimensions = os.getenv("THEME_REDUCE_DIMENSIONS", "False").strip().lower() in (
