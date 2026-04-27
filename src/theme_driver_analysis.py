@@ -325,11 +325,11 @@ def theme_driver_analysis(spark: Any = None, save_to_table: bool = False) -> Dic
     if "text_column" not in theme_config:
         logger.warning("THEME_TEXT_COLUMN was not set; using default '%s'", text_column)
 
-    results = analyzer.run_complete_analysis(
+    results = analyzer.run_theme_analysis(
         data_folder=theme_config["data_folder"],
         text_column=text_column,
         clustering_method=theme_config["clustering_method"],
-        reduce_dimensions=theme_config["reduce_dimensions"],
+        reduce_dimensions=theme_config["dim_reduction_method"],
         norm=theme_config["norm"],
         **theme_config["clustering_params"],
     )
