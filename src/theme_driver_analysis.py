@@ -89,7 +89,7 @@ def save_theme_results(results: Dict[str, Any], output_path: str) -> None:
         "clustering_method": results.get("clustering_method", results.get("clustering", {}).get("method", "unknown")),
         "n_clusters": results.get("n_clusters", []),
         "raw_response": results.get("topics", []),
-        "recommendations": results.get("recommendations", []),
+        "themes": results.get("themes", []),
         "cluster_payloads": results.get("cluster_payloads", []),
         "raw_results": results
     }

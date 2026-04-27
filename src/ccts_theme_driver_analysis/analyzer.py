@@ -324,6 +324,6 @@ class ThemeAnalyzer:
             'clustering': clustering_result,
             'clustering_method': clustering_result.get('method', 'unknown'),
             'topics': topic_result,
-            'recommendations':topic_result.get('topics',[]),
+            'themes':topic_result.get('topics',[]),
             'cluster_payloads':topic_result.get('cluster_payloads',[])
         }

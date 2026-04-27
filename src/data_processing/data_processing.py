@@ -208,3 +208,65 @@ class DataProcessor:
                 records.append(record)
 
         return pd.DataFrame(records)
+    
+    @staticmethod
+    def save_dataframe_to_databricks_table(
+        df: pd.DataFrame,
+        spark: Any,
+        table_name: str,
+        created_by: str,
+        updated_by: str,
+        processing_data: Any = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        mode: str = "overwrite",
+    ) -> str:
+        """
+        Save a DataFrame as a Databricks table using a Spark session.
+
+        Args:
+            df: DataFrame to save.
+            spark: Active Spark session for Databricks.
+            table_name: Target table name.
+            created_by: Creator identifier.
+            updated_by: Updater identifier.
+            processing_data: Optional processing metadata.
+            created_at: Optional creation timestamp; defaults to current UTC.
+            updated_at: Optional update timestamp; defaults to current UTC.
+            mode: Spark save mode, such as "overwrite" or "append".
+
+        Returns:
+            Table name that was saved.
+
+        Raises:
+            DataProcessingError: If the DataFrame is invalid or save fails.
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise DataProcessingError("Input must be a pandas DataFrame.")
+        if spark is None:
+            raise DataProcessingError("A Spark session is required to save to a Databricks table.")
+        if not table_name:
+            raise DataProcessingError("A table_name is required to save to a Databricks table.")
+
+        created_at = created_at or datetime.utcnow()
+        updated_at = updated_at or datetime.utcnow()
+
+        df = df.copy()
+        df["processing_data"] = processing_data
+        if "created_at" not in df.columns or df["created_at"].isna().all():
+            df["created_at"] = created_at
+        if "created_by" not in df.columns or df["created_by"].isna().all():
+            df["created_by"] = created_by
+        df["updated_at"] = updated_at
+        df["updated_by"] = updated_by
+
+        try:
+            spark_df = spark.createDataFrame(df)
+            if mode.lower() == "append" and spark.catalog.tableExists(table_name):
+                spark_df.write.mode("append").saveAsTable(table_name)
+            else:
+                spark_df.write.mode(mode).saveAsTable(table_name)
+            return table_name
+        except Exception as e:
+            logger.error(f"Failed to save DataFrame as Databricks table {table_name}: {e}", exc_info=True)
+            raise DataProcessingError(f"Failed to save Databricks table: {e}") from e
