@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Union, Optional, Tuple
 import json
 import pandas as pd
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -216,7 +217,7 @@ class DataProcessor:
         table_name: str,
         created_by: str,
         updated_by: str,
-        processing_data: Any = None,
+        processing_date: Any = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
         mode: str = "overwrite",
@@ -248,15 +249,15 @@ class DataProcessor:
         if not table_name:
             raise DataProcessingError("A table_name is required to save to a Databricks table.")
 
-        created_at = created_at or datetime.utcnow()
-        updated_at = updated_at or datetime.utcnow()
+        created_at = created_at or datetime.utcnow().isoformat()
+        updated_at = updated_at or datetime.utcnow().isoformat()
 
         df = df.copy()
-        df["processing_data"] = processing_data
-        if "created_at" not in df.columns or df["created_at"].isna().all():
-            df["created_at"] = created_at
-        if "created_by" not in df.columns or df["created_by"].isna().all():
-            df["created_by"] = created_by
+        df["processing_date"] = datetime.utcnow().isoformat()
+        # if "created_at" not in df.columns or df["created_at"].isna().all():
+        #     df["created_at"] = created_at
+        # if "created_by" not in df.columns or df["created_by"].isna().all():
+        #     df["created_by"] = created_by
         df["updated_at"] = updated_at
         df["updated_by"] = updated_by
 
