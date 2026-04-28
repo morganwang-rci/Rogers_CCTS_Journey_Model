@@ -211,7 +211,7 @@ class DataProcessor:
         return pd.DataFrame(records)
     
     @staticmethod
-    def save_dataframe_to_databricks_table(
+    def save_dataframe_to_journey_table(
         df: pd.DataFrame,
         spark: Any,
         table_name: str,
