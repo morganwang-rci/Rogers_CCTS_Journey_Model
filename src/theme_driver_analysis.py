@@ -297,21 +297,39 @@ def save_theme_results_to_databricks(
     Returns:
         The table name that was saved.
     """
-    table_df = build_theme_databricks_rows(results, created_by, updated_by, process_date, created_at, updated_at)
+    table_df = build_theme_databricks_rows(
+        results=results,
+        created_by=created_by,
+        updated_by=updated_by,
+        process_date=process_date,
+        created_at=created_at,
+        updated_at=updated_at
+    )
     if table_df.empty:
         raise ValueError("No theme rows available to save to Databricks table.")
 
     logger.info(f"Saving {len(table_df)} theme records to Databricks table: {table_name}")
     
+    # return DataProcessor.save_dataframe_to_journey_table(
+    #     table_df,
+    #     spark,
+    #     table_name,
+    #     created_by=created_by,
+    #     updated_by=updated_by,
+    #     processing_date= process_date or datetime.utcnow().isoformat(),
+    #     created_at=created_at or datetime.utcnow().isoformat(),
+    #     updated_at= updated_at or datetime.utcnow().isoformat(),
+    #     mode=mode,
+    # )
     return DataProcessor.save_dataframe_to_journey_table(
-        table_df,
-        spark,
-        table_name,
+        df=table_df,
+        spark=spark,
+        table_name=table_name,
         created_by=created_by,
         updated_by=updated_by,
-        processing_date= process_date or datetime.utcnow().isoformat(),
-        created_at=created_at or datetime.utcnow().isoformat(),
-        updated_at= updated_at or datetime.utcnow().isoformat(),
+        processing_date=process_date,
+        created_at=created_at,
+        updated_at=updated_at,
         mode=mode,
     )
 
