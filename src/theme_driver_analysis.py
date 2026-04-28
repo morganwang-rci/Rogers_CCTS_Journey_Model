@@ -297,7 +297,7 @@ def save_theme_results_to_databricks(
     Returns:
         The table name that was saved.
     """
-    table_df = build_theme_databricks_rows(results, process_date, created_by, updated_by)
+    table_df = build_theme_databricks_rows(results, created_by, updated_by, process_date, created_at, updated_at)
     if table_df.empty:
         raise ValueError("No theme rows available to save to Databricks table.")
 
@@ -366,7 +366,7 @@ def theme_driver_analysis(spark: Any = None, save_to_table: bool = False) -> Dic
 
     output_table = os.getenv("THEME_OUTPUT_TABLE")
     if save_to_table and spark is not None and output_table:
-        process_date = datetime.utcnow().date().isoformat()
+        process_date = datetime.utcnow().isoformat()
         created_by = os.getenv("THEME_CREATED_BY", "unknown")
         created_at = os.getenv("THEME_CREATED_AT", process_date)
         updated_by = os.getenv("THEME_UPDATED_BY", created_by)
