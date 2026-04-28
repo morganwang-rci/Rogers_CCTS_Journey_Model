@@ -114,7 +114,7 @@ def load_agent_improvemen_config() -> Dict[str, Any]:
 #     return config
 
 
-def save_theme_results(results: Dict[str, Any], output_path: str) -> None:
+def save_agent_results(results: Dict[str, Any], output_path: str) -> None:
     """Save a lightweight theme analysis summary to JSON."""
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -205,15 +205,18 @@ def agent_improvements_analysis(
     )
     
     logger.info(
-        "Analysis completed. Found %s clusters and extracted %s topics.",
-        results["metadata"]["n_clusters"],
-        results["metadata"]["n_topics"],
+        "Theme analysis completed. Found %s clusters.",
+        results.get("clustering", {}).get("n_clusters"),
     )
+
+    output_path = theme_config["output_path"]
+    if output_path:
+        save_agent_results(results, output_path)
     
     # Save to file if output path specified
-    output_path = ai_config.get("output_path")
-    if output_path:
-        logger.info(f"Results saved to: {output_path}")
+    # output_path = ai_config.get("output_path")
+    # if output_path:
+    #     logger.info(f"Results saved to: {output_path}")
     
     # TODO: Implement Databricks table save if needed
     # if save_to_table and spark is not None:
@@ -222,26 +225,17 @@ def agent_improvements_analysis(
     #         # Implement save logic similar to theme_driver_analysis
     #         pass
     
-    logger.info("="*80)
-    logger.info("Agent Improvements Analysis Completed Successfully")
-    logger.info("="*80)
+    # logger.info("="*80)
+    # logger.info("Agent Improvements Analysis Completed Successfully")
+    # logger.info("="*80)
     
-    return results
+    # return results
 
 
 if __name__ == "__main__":
     try:
-        results = agent_improvements_analysis()
-        
-        # Print summary
-        print("\n" + "="*80)
-        print("ANALYSIS SUMMARY")
-        print("="*80)
-        print(f"Total improvement areas: {results['metadata']['n_texts']}")
-        print(f"Clusters found: {results['metadata']['n_clusters']}")
-        print(f"Topics extracted: {results['metadata']['n_topics']}")
-        print("="*80)
-        
+        agent_improvements_analysis()
+    
     except Exception as exc:
         logger.exception("Agent improvements analysis failed: %s", exc)
         sys.exit(1)
