@@ -275,9 +275,9 @@ def save_theme_results_to_databricks(
     spark: Any,
     results: Dict[str, Any],
     table_name: str,
-    process_date: Optional[datetime] = None,
     created_by: str,
     updated_by: str,
+    process_date: Optional[datetime] = None,
     created_at: Optional[datetime] = None,
     updated_at: Optional[datetime] = None,
     mode: str = "append"

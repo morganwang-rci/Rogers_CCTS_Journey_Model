@@ -271,3 +271,318 @@ class DataProcessor:
         except Exception as e:
             logger.error(f"Failed to save DataFrame as Databricks table {table_name}: {e}", exc_info=True)
             raise DataProcessingError(f"Failed to save Databricks table: {e}") from e
+    
+
+    @staticmethod
+    def extract_case_interaction_analysis(data_or_file: Union[Dict, str, Path]) -> List[Dict[str, Any]]:
+        """
+        Extract interaction-level and agent-level data from case interaction JSON.
+        
+        Processes the nested structure containing conversational analysis and 
+        agent evaluations, returning one record per agent evaluation (or one 
+        interaction-level record if no agent evaluations exist).
+        
+        Parameters
+        ----------
+        data_or_file : dict or str or Path
+            Either:
+            - a loaded Python dictionary containing the JSON data
+            - or a path to a JSON file
+            
+        Returns
+        -------
+        list[dict]
+            List of flattened records. One record per agent evaluation, or one
+            interaction-level record if no agent evaluations exist.
+        """
+        try:
+            # Load JSON if a file path is provided
+            if isinstance(data_or_file, (str, Path)):
+                file_path = Path(data_or_file)
+                try:
+                    data = DataProcessor._load_json_file(file_path)
+                except DataProcessingError as e:
+                    logger.error(f"Failed to load {file_path.name}: {e}")
+                    return []
+                file_name = file_path.name
+            elif isinstance(data_or_file, dict):
+                data = data_or_file
+                file_name = None
+            else:
+                logger.error(f"Invalid input type: {type(data_or_file).__name__}. Expected dict, str, or Path.")
+                return []
+            
+            records = []
+            
+            # Normalize data to a list of interactions
+            interactions = data if isinstance(data, list) else [data]
+            
+            for interaction in interactions:
+                # -----------------------------
+                # Top-level blocks
+                # -----------------------------
+                conversational_analysis = DataProcessor.safe_get(interaction, "Conversational analysis", default={}) or {}
+                agent_evaluation_block = DataProcessor.safe_get(interaction, "Agent Evaluation", default={}) or {}
+                
+                interaction_metadata = DataProcessor.safe_get(conversational_analysis, "interaction_metadata", default={}) or {}
+                interaction_summary = DataProcessor.safe_get(conversational_analysis, "interaction_summary", default={}) or {}
+                escalation_factors = DataProcessor.safe_get(conversational_analysis, "escalation_factors", default={}) or {}
+                journey_insights = DataProcessor.safe_get(conversational_analysis, "journey_insights", default={}) or {}
+                
+                # -----------------------------
+                # Base interaction-level record
+                # -----------------------------
+                base_record = {
+                    # File / identifiers
+                    "file_name": file_name,
+                    "interaction_sequence": interaction.get("interaction_sequence"),
+                    "interaction_identifier": interaction.get("interaction_identifier"),
+                    "calendar_date": interaction.get("calendar_date"),
+                    "case_number": interaction.get("case_number"),
+                    
+                    # Conversational analysis - interaction metadata
+                    "interaction_date": interaction_metadata.get("interaction_date"),
+                    "metadata_case_number": interaction_metadata.get("case_number"),
+                    "file_number": interaction_metadata.get("file_number"),
+                    "ccts_customer_issue": interaction_metadata.get("ccts_customer_issue"),
+                    "customer_issue": interaction_metadata.get("ccts_customer_issue"),  # alias for convenience
+                    "key_topics_discussed": interaction_metadata.get("key_topics_discussed", []),
+                    "notable_moments": interaction_metadata.get("notable_moments", []),
+                    
+                    # Conversational analysis - interaction summary
+                    "structured_summary": interaction_summary.get("structured_summary"),
+                    "identified_main_issue": interaction_summary.get("identified_main_issue"),
+                    "customer_intent": interaction_summary.get("customer_intent"),
+                    "agent_response": interaction_summary.get("agent_response"),
+                    
+                    # Keep raw summary block too
+                    "interaction_summary_raw": interaction_summary,
+                    
+                    # Conversational analysis - escalation factors
+                    "escalation_risk_score": escalation_factors.get("escalation_risk_score"),
+                    "contributing_factors": escalation_factors.get("contributing_factors", []),
+                    "customer_frustration_points": escalation_factors.get("customer_frustration_points", []),
+                    "internal_transfer": escalation_factors.get("interal_transfer") or escalation_factors.get("internal_transfer"),
+                    "dropped_calls": escalation_factors.get("dropped_calls"),
+                    "customer_callbacks": escalation_factors.get("customer_callbacks"),
+                    
+                    # Keep raw escalation block too
+                    "escalation_factors_raw": escalation_factors,
+                    
+                    # Conversational analysis - journey insights
+                    "journey_stage": journey_insights.get("journey_stage"),
+                    "patterns_identified": journey_insights.get("patterns_identified", []),
+                    "interaction_value_for_journey_analysis": journey_insights.get("interaction_value_for_journey_analysis"),
+                    "unresolved_items": journey_insights.get("unresolved_items", []),
+                    "recommended_journey_tags": journey_insights.get("recommended_journey_tags", []),
+                    
+                    # Keep raw journey block too
+                    "journey_insights_raw": journey_insights,
+                    
+                    # Optional raw conversational analysis
+                    "conversational_analysis_raw": conversational_analysis,
+                }
+                
+                # -----------------------------
+                # Agent evaluations
+                # -----------------------------
+                agent_evaluations = agent_evaluation_block.get("agent_evaluations", [])
+                
+                # If there are no agent evaluations, still return the interaction-level record
+                if not agent_evaluations:
+                    no_agent_record = base_record.copy()
+                    no_agent_record.update({
+                        "agent_identifier": None,
+                        
+                        # Performance evaluation
+                        "overall_performance": None,
+                        "key_strengths": [],
+                        "improvement_areas": [],
+                        "evaluation_of_next_steps": None,
+                        
+                        # Communication skills
+                        "communication_skills_rating": None,
+                        "communication_skills_justification": None,
+                        
+                        # Empathy
+                        "empathy_level_rating": None,
+                        "empathy_level_justification": None,
+                        
+                        # Professionalism
+                        "professionalism_level_rating": None,
+                        "professionalism_level_justification": None,
+                        
+                        # Resolution efficiency
+                        "resolution_efficiency_rating": None,
+                        "resolution_efficiency_justification": None,
+                        
+                        # Optional raw performance block
+                        "performance_evaluation_raw": {},
+                        
+                        # Infraction assessment
+                        "agent_infraction": None,
+                        "infraction_rationale": None,
+                        "educational_gap_detected": [],
+                        "educational_gap_details": None,
+                        "unactioned_threat_detection": None,
+                        "threat_handling_assessment": None,
+                        
+                        # Optional raw infraction block
+                        "infraction_assessment_raw": {},
+                        
+                        # Internal escalation
+                        "escalation_appropriate": None,
+                        "escalation_timing": None,
+                        "escalation_effectiveness": None,
+                        
+                        # Optional raw escalation block
+                        "internal_escalation_raw": {},
+                    })
+                    records.append(no_agent_record)
+                    continue
+                
+                # One row per agent evaluation
+                for agent_eval in agent_evaluations:
+                    performance_evaluation = agent_eval.get("performance_evaluation", {}) or {}
+                    infraction_assessment = agent_eval.get("infraction_assessment", {}) or {}
+                    internal_escalation = agent_eval.get("internal_escalation", {}) or {}
+                    
+                    # Nested rating objects
+                    communication_skills = performance_evaluation.get("communication_skills", {}) or {}
+                    empathy_level = performance_evaluation.get("empathy_level", {}) or {}
+                    professionalism_level = performance_evaluation.get("professionalism_level", {}) or {}
+                    resolution_efficiency = performance_evaluation.get("resolution_efficiency", {}) or {}
+                    
+                    agent_record = base_record.copy()
+                    agent_record.update({
+                        # Agent ID
+                        "agent_identifier": agent_eval.get("agent_identifier"),
+                        
+                        # Performance evaluation
+                        "overall_performance": performance_evaluation.get("overall_performance"),
+                        "key_strengths": performance_evaluation.get("key_strengths", []),
+                        "improvement_areas": performance_evaluation.get("improvement_areas", []),
+                        "evaluation_of_next_steps": performance_evaluation.get("evaluation_of_next_steps"),
+                        
+                        # Communication skills
+                        "communication_skills_rating": communication_skills.get("rating"),
+                        "communication_skills_justification": communication_skills.get("justification"),
+                        
+                        # Empathy
+                        "empathy_level_rating": empathy_level.get("rating"),
+                        "empathy_level_justification": empathy_level.get("justification"),
+                        
+                        # Professionalism
+                        "professionalism_level_rating": professionalism_level.get("rating"),
+                        "professionalism_level_justification": professionalism_level.get("justification"),
+                        
+                        # Resolution efficiency
+                        "resolution_efficiency_rating": resolution_efficiency.get("rating"),
+                        "resolution_efficiency_justification": resolution_efficiency.get("justification"),
+                        
+                        # Optional raw performance block
+                        "performance_evaluation_raw": performance_evaluation,
+                        
+                        # Infraction assessment
+                        "agent_infraction": infraction_assessment.get("agent_infraction"),
+                        "infraction_rationale": infraction_assessment.get("infraction_rationale"),
+                        "educational_gap_detected": infraction_assessment.get("educational_gap_detected", []),
+                        "educational_gap_details": infraction_assessment.get("educational_gap_details"),
+                        "unactioned_threat_detection": infraction_assessment.get("unactioned_threat_detection"),
+                        "threat_handling_assessment": infraction_assessment.get("threat_handling_assessment"),
+                        
+                        # Optional raw infraction block
+                        "infraction_assessment_raw": infraction_assessment,
+                        
+                        # Internal escalation
+                        "escalation_appropriate": internal_escalation.get("escalation_appropriate"),
+                        "escalation_timing": internal_escalation.get("escalation_timing"),
+                        "escalation_effectiveness": internal_escalation.get("escalation_effectiveness"),
+                        
+                        # Optional raw escalation block
+                        "internal_escalation_raw": internal_escalation,
+                    })
+                    
+                    records.append(agent_record)
+            
+            return records
+            
+        except Exception as e:
+            logger.error(f"Unexpected error extracting case interaction analysis: {e}", exc_info=True)
+            return []
+
+    @staticmethod
+    def process_case_interaction_folder(folder_path: Union[str, Path], pattern: str = "*.json") -> pd.DataFrame:
+        """
+        Process all case interaction JSON files in a folder and return a DataFrame.
+        
+        Each file can contain one or multiple interactions, and each interaction
+        can have zero or more agent evaluations. Returns one row per agent evaluation
+        (or one row per interaction if no agent evaluations exist).
+        
+        Args:
+            folder_path: Path to folder containing JSON files
+            pattern: Glob pattern for files to process
+            
+        Returns:
+            DataFrame with extracted records
+        """
+        records = []
+        
+        for file_path in Path(folder_path).glob(pattern):
+            file_records = DataProcessor.extract_case_interaction_analysis(file_path)
+            records.extend(file_records)
+        
+        return pd.DataFrame(records)
+    
+    @staticmethod
+    def load_agent_improvement_data(data_folder: Union[str, Path]) -> pd.DataFrame:
+        """
+        Load and process agent improvement data from JSON files.
+        
+        Uses extract_case_interaction_analysis to get comprehensive interaction and 
+        agent evaluation data, then explodes improvement_areas to create one row 
+        per improvement item for clustering analysis.
+        
+        Args:
+            data_folder: Path to folder containing JSON files
+            
+        Returns:
+            DataFrame with exploded improvement_areas (one row per improvement)
+            
+        Raises:
+            FileNotFoundError: If no JSON files found in folder
+            DataProcessingError: If no valid records extracted
+        """
+        data_folder = Path(data_folder)
+        logger.info(f"Loading agent improvement data from: {data_folder}")
+        
+        # Use the comprehensive case interaction extraction
+        df = DataProcessor.process_case_interaction_folder(data_folder)
+        
+        if df.empty:
+            raise DataProcessingError("No valid records extracted from JSON files")
+        
+        logger.info(f"Loaded {len(df)} total agent evaluation records")
+        
+        # Extract and explode improvement_areas
+        if 'improvement_areas' not in df.columns:
+            raise DataProcessingError("No 'improvement_areas' column found in data")
+        
+        # Drop rows without improvement areas
+        df_with_improvements = df.dropna(subset=['improvement_areas'])
+        logger.info(f"Records with improvements: {len(df_with_improvements)}")
+        
+        # Explode the list column
+        df_exploded = df_with_improvements.explode('improvement_areas')
+        df_exploded = df_exploded.dropna(subset=['improvement_areas'])
+        df_exploded = df_exploded[df_exploded['improvement_areas'].str.strip().astype(bool)]
+        
+        logger.info(f"After explosion: {len(df_exploded)} improvement items")
+        
+        return df_exploded.reset_index(drop=True)
+
+
+
+
+
