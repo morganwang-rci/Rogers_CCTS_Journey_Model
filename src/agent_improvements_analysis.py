@@ -185,9 +185,7 @@ def agent_improvements_analysis(
     # Create analyzer
     logger.info("Initializing Agent Improvement Analyzer...")
     analyzer = AgentImprovementAnalyzer(
-        azure_client=client,
-        llm_model="gpt-4o",
-        embedding_model="text-embedding-ada-002"
+        azure_client=client
     )
     
     # Run analysis
@@ -197,7 +195,7 @@ def agent_improvements_analysis(
         clustering_method=ai_config["clustering_method"],
         norm=ai_config["norm"],
         dim_reduction_method=ai_config["dim_reduction_method"],
-        **theme_config["clustering_params"],
+        **ai_config["clustering_params"],
         # top_n_representative=ai_config["top_n_representative"],
         # visualize=ai_config["visualize"],
         # output_path=ai_config.get("output_path"),
@@ -209,7 +207,7 @@ def agent_improvements_analysis(
         results.get("clustering", {}).get("n_clusters"),
     )
 
-    output_path = theme_config["output_path"]
+    output_path = ai_config["output_path"]
     if output_path:
         save_agent_results(results, output_path)
     
