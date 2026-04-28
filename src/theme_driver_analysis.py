@@ -103,13 +103,14 @@ def save_theme_results(results: Dict[str, Any], output_path: str) -> None:
 
 
 
+
 def build_theme_databricks_rows(
     results: Dict[str, Any],
-    process_date: str,
     created_by: str,
     updated_by: str,
-    created_at: Optional[datetime] = None,
-    updated_at: Optional[datetime] = None,
+    process_date: Optional[datetime] = None,
+    created_at: Optional[datetime]= None,
+    updated_at: Optional[datetime] = None
 ) -> pd.DataFrame:
     """
     Build a table-ready DataFrame for theme results with metadata.
@@ -123,70 +124,91 @@ def build_theme_databricks_rows(
     Returns:
         DataFrame containing rows ready for Databricks save.
     """
-    total_texts = len(results.get("texts", []))
-    topic_data = results.get("topics", {})
+    # total_texts = len(results.get("texts", []))
     
-    # Extract topics/recommendations from the topic analysis result
-    # The topics can be in different formats depending on parsing
-    topics = []
+    # Extract recommendations/topics from the results
+    # Based on the actual output structure, recommendations are at the top level
+    topics = results.get("themes") or []
     
-    # Check if topics are directly in the topic_data
-    if isinstance(topic_data, dict):
-        # Try to get topics from various possible keys
-        topics = (
-            # topic_data.get("recommendations") or 
-            topic_data.get("topics") or 
-            []
-        )
-    elif isinstance(topic_data, list):
-        topics = topic_data
+    # If not found at top level, check within raw_response
+    if not topics:
+        raw_response = results.get("raw_response", {})
+        if isinstance(raw_response, dict):
+            topics =  raw_response.get("topics")    
+    # If still empty, try nested structure in topics key
+    # if not topics:
+    #     topic_data = results.get("topics", {})
+    #     if isinstance(topic_data, dict):
+    #         topics = topic_data.get("recommendations") or topic_data.get("topics") or []
+    #     elif isinstance(topic_data, list):
+    #         topics = topic_data
     
-    # If topics is still empty, try to parse from raw_response
-    if not topics and isinstance(topic_data, dict):
-        raw_response = topic_data.get("raw_response")
-        if raw_response:
-            try:
-                import json
-                from data_processing.utils import safe_json_loads
-                parsed = safe_json_loads(raw_response)
-                if isinstance(parsed, list):
-                    topics = parsed
-                elif isinstance(parsed, dict):
-                    topics = parsed.get("recommendations") or parsed.get("topics") or []
-            except Exception as e:
-                logger.warning(f"Failed to parse raw_response: {e}")
+    # Final fallback: parse from raw_response string
+    if not topics:
+        raw_response = results.get("raw_response", {})
+        if isinstance(raw_response, dict):
+            raw_response_str = raw_response.get("raw_response")
+            if raw_response_str:
+                try:
+                    import json
+                    from data_processing.utils import safe_json_loads
+                    parsed = safe_json_loads(raw_response_str)
+                    if isinstance(parsed, list):
+                        topics = parsed
+                    # elif isinstance(parsed, dict):
+                    #     topics = parsed.get("recommendations") or parsed.get("topics") or []
+                except Exception as e:
+                    logger.warning(f"Failed to parse raw_response string: {e}")
 
     if not topics:
-        logger.warning("No topics found in results")
+        logger.warning("No topics/recommendations found in results")
         return pd.DataFrame()
 
-    cluster_payloads = {
-        item.get("label"): item
-        for item in (topic_data.get("cluster_payloads", []) if isinstance(topic_data, dict) else [])
-        if isinstance(item, dict) and item.get("label") is not None
-    }
+    
+        logger.info(f"Found {len(topics)} theme to process")
+    
+    logger.info(f"Found {len(topics)} theme to process")
+    # Extract cluster payloads for cluster_size information
+    cluster_payloads = {}
+    raw_response = results.get("raw_response", {})
+    if isinstance(raw_response, dict):
+        cluster_payloads_list = raw_response.get("cluster_payloads", [])
+        cluster_payloads = {
+            item.get("label"): item
+            for item in cluster_payloads_list
+            if isinstance(item, dict) and item.get("label") is not None
+        }
+
+    # Calculate total cluster size across all clusters
+    total_cluster_size = sum(
+        item.get("cluster_size", 0)
+        for item in cluster_payloads.values()
+    )
 
     rows = []
-    for topic in topics:
-        if not isinstance(topic, dict):
+    for topic_item in topics:
+        if not isinstance(topic_item, dict):
             continue
 
-        label = topic.get("label")
-        theme = topic.get("topic") or topic.get("theme") or f"cluster_{label}"
-        description = topic.get("description")
-        reason = topic.get("reason")
-        short_example = topic.get("short_example")
+        label = topic_item.get("label")
+        theme = topic_item.get("topic") or topic_item.get("theme") or f"cluster_{label}"
+        description = topic_item.get("description")
+        reason = topic_item.get("reason")
+        short_example = topic_item.get("short_example")
 
+        # Get cluster size from cluster_payloads
         cluster_info = cluster_payloads.get(label, {})
         cluster_size = cluster_info.get("cluster_size")
+        
+        # Calculate materiality percentage based on total cluster size
         path_materiality_percentage = (
-            float(cluster_size) / total_texts * 100
-            if total_texts and cluster_size is not None
+            float(cluster_size) / total_cluster_size * 100
+            if total_cluster_size and cluster_size is not None
             else None
         )
 
         rows.append({
-            "process_date": process_date,
+            "process_date": process_date or datetime.utcnow().isoformat(),
             "label": label,
             "theme": theme,
             "description": description,
@@ -201,7 +223,6 @@ def build_theme_databricks_rows(
         })
 
     return pd.DataFrame(rows)
-
 
 
 
@@ -254,12 +275,12 @@ def save_theme_results_to_databricks(
     spark: Any,
     results: Dict[str, Any],
     table_name: str,
-    process_date: str,
+    process_date: Optional[datetime] = None,
     created_by: str,
     updated_by: str,
     created_at: Optional[datetime] = None,
     updated_at: Optional[datetime] = None,
-    mode: str = "append",
+    mode: str = "append"
 ) -> str:
     """
     Save theme analysis rows into a Databricks table.
@@ -288,7 +309,7 @@ def save_theme_results_to_databricks(
         table_name,
         created_by=created_by,
         updated_by=updated_by,
-        processing_date= datetime.utcnow().date().isoformat(),
+        processing_date= datetime.utcnow().isoformat(),
         created_at=datetime.utcnow(),
         updated_at= datetime.utcnow(),
         mode=mode,
@@ -358,6 +379,7 @@ def theme_driver_analysis(spark: Any = None, save_to_table: bool = False) -> Dic
             created_by=created_by,
             updated_by=updated_by,
             updated_at=updated_at,
+            created_at = created_at,
             mode=os.getenv("THEME_SAVE_MODE", "append"),
         )
         logger.info("Theme results saved to Databricks table %s", output_table)

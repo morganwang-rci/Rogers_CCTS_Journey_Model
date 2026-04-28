@@ -217,7 +217,7 @@ class DataProcessor:
         table_name: str,
         created_by: str,
         updated_by: str,
-        processing_date: Any = None,
+        processing_date: Optional[datetime] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
         mode: str = "overwrite",
@@ -253,7 +253,7 @@ class DataProcessor:
         updated_at = updated_at or datetime.utcnow().isoformat()
 
         df = df.copy()
-        df["processing_date"] = datetime.utcnow().isoformat()
+        df["processing_date"] =processing_date or datetime.utcnow().isoformat()
         # if "created_at" not in df.columns or df["created_at"].isna().all():
         #     df["created_at"] = created_at
         # if "created_by" not in df.columns or df["created_by"].isna().all():
